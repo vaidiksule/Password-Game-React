@@ -8,8 +8,9 @@ const rules = [
   { id: 2, description: "Your password must include a number", validate: (pwd) => /\d/.test(pwd) },
   { id: 3, description: "Your password must include an uppercase letter", validate: (pwd) => /[A-Z]/.test(pwd) },
   { id: 4, description: "Your password must include a special character", validate: (pwd) => /[!@#$%^&*(),.?":{}|<>]/.test(pwd) },
-  { id: 5, description: "The digits in your password must add up to 25", validate: (pwd) => {
-      const digits = pwd.replace(/\D/g, ""); 
+  {
+    id: 5, description: "The digits in your password must add up to 25", validate: (pwd) => {
+      const digits = pwd.replace(/\D/g, "");
       const sum = digits.split("").reduce((acc, digit) => acc + parseInt(digit, 10), 0);
       return sum === 25;
     }
@@ -18,24 +19,38 @@ const rules = [
   { id: 7, description: "Your password must include a Roman numeral", validate: (pwd) => /[IVXLCDM]/.test(pwd) },
   { id: 8, description: "Your password must include the first five digits of Pi (3.1415)", validate: (pwd) => /3\.1415/.test(pwd) },
   { id: 9, description: "Your password must include a simple math expression", validate: (pwd) => /\d+\s*[\+\-\*\/]\s*\d+\s*=\s*\d+/.test(pwd) },
-  { id: 10, description: "Your password must include one of the following words: ", validate: (pwd, randomWords) => randomWords.some(word => pwd.includes(word)), randomWords: [] }
+  { id: 10, description: "Your password must include one of the following words: ", validate: (pwd, randomWords) => randomWords.some(word => pwd.toLowerCase().includes(word.toLowerCase())), randomWords: [] },
+  { id: 11, description: "All the vowels should be capital", validate: (pwd) => !/[aeiou]/.test(pwd) && /[AEIOU]/.test(pwd) },
+  { id: 12, description: "Your password is not strong enough🏋️ [the password must include this emoji🏋️ three times]", validate: (pwd) => (pwd.match(/🏋️/g) || []).length === 3 },
+  { id: 13, description: "Your password must include one of these sentences: ", validate: (pwd, randomSentences) => randomSentences.some(sentence => pwd.toLowerCase().includes(sentence.toLowerCase())), randomSentences: [] },
+  { id: 14, description: "Your password must include a leap year", validate: (pwd) => /([0-9]{4})/.test(pwd) && (pwd.match(/([0-9]{4})/g).some(year => (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0))) }
 ];
 
 // Generate three random words for the user to include in their password
 const generateRandomWords = () => {
   const words = [
-    "ephemeral", "cacophony", "sonder", "ineffable", "juxtaposition", "serendipity", 
-    "sonder", "nefarious", "elucidate", "perspicacious", "sonder", "ubiquitous", 
-    "zephyr", "supercilious", "iridescent", "recalcitrant", "inevitable", "lugubrious", 
-    "soliloquy", "epistemology", "recondite", "sonder", "panacea", "sonder", "melancholy", 
-    "quixotic", "mellifluous", "zeitgeist", "exacerbate", "obfuscate", "idiosyncratic", 
-    "unfathomable", "disenfranchise", "intransigent", "phantasmagoria", "limerence", 
-    "threnody", "esoteric", "camaraderie", "ethereal", "numinous", "precipice", "plethora", 
-    "vociferous", "flabbergasted", "perspicuity", "conundrum", "paradigm", "quagmire", 
+    "ephemeral", "cacophony", "sonder", "ineffable", "juxtaposition", "serendipity",
+    "sonder", "nefarious", "elucidate", "perspicacious", "sonder", "ubiquitous",
+    "zephyr", "supercilious", "iridescent", "recalcitrant", "inevitable", "lugubrious",
+    "soliloquy", "epistemology", "recondite", "sonder", "panacea", "sonder", "melancholy",
+    "quixotic", "mellifluous", "zeitgeist", "exacerbate", "obfuscate", "idiosyncratic",
+    "unfathomable", "disenfranchise", "intransigent", "phantasmagoria", "limerence",
+    "threnody", "esoteric", "camaraderie", "ethereal", "numinous", "precipice", "plethora",
+    "vociferous", "flabbergasted", "perspicuity", "conundrum", "paradigm", "quagmire",
     "reverberate", "apocryphal", "inscrutable", "luminous", "epistolary"
-];
+  ];
   const shuffled = words.sort(() => 0.5 - Math.random());
   return shuffled.slice(0, 3);
+};
+
+// Generate two random three-word sentences for the user to include in their password
+const generateRandomSentences = () => {
+  const words = ["blue", "green", "yellow", "happy", "sad", "excited", "jump", "run", "swim", "cat", "dog", "mouse", "car", "bike", "boat"];
+  const shuffledWords = words.sort(() => 0.5 - Math.random());
+  return [
+    `${shuffledWords[0]} ${shuffledWords[1]} ${shuffledWords[2]}`,
+    `${shuffledWords[3]} ${shuffledWords[4]} ${shuffledWords[5]}`
+  ];
 };
 
 const PasswordPage = () => {
@@ -46,7 +61,8 @@ const PasswordPage = () => {
   const [showConfirm, setShowConfirm] = useState(false); // Show confirmation input or not
   const [startTime, setStartTime] = useState(null); // Start time for password entry
   const [completionTime, setCompletionTime] = useState(null); // Completion time for password entry
-  const [randomWords, setRandomWords] = useState([]); // Random words for the last rule
+  const [randomWords, setRandomWords] = useState([]); // Random words for rule 10
+  const [randomSentences, setRandomSentences] = useState([]); // Random sentences for rule 13
   const [showCompletedPage, setShowCompletedPage] = useState(false); // Show the completed page or not
 
   useEffect(() => {
@@ -56,6 +72,13 @@ const PasswordPage = () => {
     const randomWordsRuleIndex = rules.findIndex(rule => rule.id === 10);
     rules[randomWordsRuleIndex].description += words.join(", ");
     rules[randomWordsRuleIndex].randomWords = words;
+
+    // Generate random sentences and set them in the rules
+    const sentences = generateRandomSentences();
+    setRandomSentences(sentences);
+    const randomSentencesRuleIndex = rules.findIndex(rule => rule.id === 13);
+    rules[randomSentencesRuleIndex].description += sentences.join(" or ");
+    rules[randomSentencesRuleIndex].randomSentences = sentences;
   }, []);
 
   // Handle password input change
@@ -72,7 +95,11 @@ const PasswordPage = () => {
     // Check rules sequentially for the first time they appear
     for (let i = 0; i < rules.length; i++) {
       const rule = rules[i];
-      const isValid = rule.randomWords ? rule.validate(newPassword, rule.randomWords) : rule.validate(newPassword);
+      const isValid = rule.randomWords
+        ? rule.validate(newPassword, rule.randomWords)
+        : rule.randomSentences
+          ? rule.validate(newPassword, rule.randomSentences)
+          : rule.validate(newPassword);
       if (isValid) {
         newCompletedRules.push(rule.id);
         if (!newVisibleRules.includes(rule.id + 1) && rule.id + 1 <= rules.length) {
@@ -86,7 +113,11 @@ const PasswordPage = () => {
     // Validate already visible rules in any order
     for (let i = 0; i < visibleRules.length; i++) {
       const rule = rules[visibleRules[i] - 1];
-      const isValid = rule.randomWords ? rule.validate(newPassword, rule.randomWords) : rule.validate(newPassword);
+      const isValid = rule.randomWords
+        ? rule.validate(newPassword, rule.randomWords)
+        : rule.randomSentences
+          ? rule.validate(newPassword, rule.randomSentences)
+          : rule.validate(newPassword);
       if (isValid && !newCompletedRules.includes(rule.id)) {
         newCompletedRules.push(rule.id);
       }
@@ -94,6 +125,7 @@ const PasswordPage = () => {
 
     setCompletedRules(newCompletedRules);
     setVisibleRules(newVisibleRules);
+
 
     if (newCompletedRules.length === rules.length) {
       setCompletionTime(new Date().getTime());
@@ -113,6 +145,7 @@ const PasswordPage = () => {
     if (password === confirmPassword) {
       const endTime = new Date().getTime();
       const timeTaken = Math.round((endTime - startTime) / 1000);
+      setCompletionTime(endTime);
       setShowCompletedPage(true);
     } else {
       alert("Passwords do not match. Please try again.");
