@@ -23,7 +23,17 @@ const rules = [
 
 // Generate three random words for the user to include in their password
 const generateRandomWords = () => {
-  const words = ["apple", "zebra", "guitar", "pyramid", "whisper", "galaxy"];
+  const words = [
+    "ephemeral", "cacophony", "sonder", "ineffable", "juxtaposition", "serendipity", 
+    "sonder", "nefarious", "elucidate", "perspicacious", "sonder", "ubiquitous", 
+    "zephyr", "supercilious", "iridescent", "recalcitrant", "inevitable", "lugubrious", 
+    "soliloquy", "epistemology", "recondite", "sonder", "panacea", "sonder", "melancholy", 
+    "quixotic", "mellifluous", "zeitgeist", "exacerbate", "obfuscate", "idiosyncratic", 
+    "unfathomable", "disenfranchise", "intransigent", "phantasmagoria", "limerence", 
+    "threnody", "esoteric", "camaraderie", "ethereal", "numinous", "precipice", "plethora", 
+    "vociferous", "flabbergasted", "perspicuity", "conundrum", "paradigm", "quagmire", 
+    "reverberate", "apocryphal", "inscrutable", "luminous", "epistolary"
+];
   const shuffled = words.sort(() => 0.5 - Math.random());
   return shuffled.slice(0, 3);
 };
