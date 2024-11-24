@@ -21,7 +21,7 @@ const rules = [
   { id: 9, description: "Your password must include a simple math expression", validate: (pwd) => /\d+\s*[\+\-\*\/]\s*\d+\s*=\s*\d+/.test(pwd) },
   { id: 10, description: "Your password must include one of the following words: ", validate: (pwd, randomWords) => randomWords.some(word => pwd.toLowerCase().includes(word.toLowerCase())), randomWords: [] },
   { id: 11, description: "All the vowels should be capital", validate: (pwd) => !/[aeiou]/.test(pwd) && /[AEIOU]/.test(pwd) },
-  { id: 12, description: "Your password is not strong enough🏋️ [the password must include this emoji🏋️ three times]", validate: (pwd) => (pwd.match(/🏋️/g) || []).length === 3 },
+  { id: 12, description: "Your password is not strong enough🏋️", validate: (pwd) => (pwd.match(/🏋️/g) || []).length === 3 },
   { id: 13, description: "Your password must include one of these sentences: ", validate: (pwd, randomSentences) => randomSentences.some(sentence => pwd.toLowerCase().includes(sentence.toLowerCase())), randomSentences: [] },
   { id: 14, description: "Your password must include a leap year", validate: (pwd) => /([0-9]{4})/.test(pwd) && (pwd.match(/([0-9]{4})/g).some(year => (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0))) }
 ];
@@ -43,15 +43,22 @@ const generateRandomWords = () => {
   return shuffled.slice(0, 3);
 };
 
-// Generate two random three-word sentences for the user to include in their password
+// Generate three random sentences for the user to include in their password
 const generateRandomSentences = () => {
-  const words = ["blue", "green", "yellow", "happy", "sad", "excited", "jump", "run", "swim", "cat", "dog", "mouse", "car", "bike", "boat"];
-  const shuffledWords = words.sort(() => 0.5 - Math.random());
+  const sentences = [
+    "I am loved", "I am hungry", "He is poor", "You are noob",
+    "She is happy", "They are here", "We are together", "It is done",
+    "Life is beautiful", "Time is precious", "Dreams come true", "Believe in yourself"
+  ];
+  const shuffledSentences = sentences.sort(() => 0.5 - Math.random());
   return [
-    `${shuffledWords[0]} ${shuffledWords[1]} ${shuffledWords[2]}`,
-    `${shuffledWords[3]} ${shuffledWords[4]} ${shuffledWords[5]}`
+    shuffledSentences[0],
+    shuffledSentences[1],
+    shuffledSentences[2]
   ];
 };
+
+
 
 const PasswordPage = () => {
   const [password, setPassword] = useState(""); // User-entered password
@@ -72,14 +79,18 @@ const PasswordPage = () => {
     const randomWordsRuleIndex = rules.findIndex(rule => rule.id === 10);
     rules[randomWordsRuleIndex].description += words.join(", ");
     rules[randomWordsRuleIndex].randomWords = words;
-
+  
     // Generate random sentences and set them in the rules
     const sentences = generateRandomSentences();
     setRandomSentences(sentences);
     const randomSentencesRuleIndex = rules.findIndex(rule => rule.id === 13);
-    rules[randomSentencesRuleIndex].description += sentences.join(" or ");
+    rules[randomSentencesRuleIndex].description = `Your password must include one of these sentences:
+  1. ${sentences[0]}
+  2. ${sentences[1]}
+  3. ${sentences[2]}`;
     rules[randomSentencesRuleIndex].randomSentences = sentences;
   }, []);
+  
 
   // Handle password input change
   const handlePasswordChange = (e) => {
